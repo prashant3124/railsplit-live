@@ -18,8 +18,8 @@ import sqlite3
 from contextlib import contextmanager
 from pathlib import Path
 
-import smtplib
-from email.message import EmailMessage
+import json
+import urllib.request
 
 import bcrypt
 from fastapi import Depends, FastAPI, HTTPException, Query
@@ -63,7 +63,7 @@ app = FastAPI(title="Rail Split API")
 # frontend on VS Code Live Server (127.0.0.1:5500) or opened directly as a file ("null")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://127.0.0.1:5500", "http://localhost:5500", "null"],
+    allow_origins=["http://127.0.0.1:5500", "http://localhost:5500", "http://127.0.0.1:8000", "null"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -205,46 +205,47 @@ def current_user_id(cred: HTTPAuthorizationCredentials = Depends(bearer)) -> int
 #hash password using bcrypt
 def hash_pw(plain: str) -> str:
     return bcrypt.hashpw(plain.encode(), bcrypt.gensalt()).decode()
+BREVO_API_KEY = os.getenv("BREVO_API_KEY")
+
+
 def send_reset_email(to_email: str, reset_link: str):
-    if not SMTP_EMAIL or not SMTP_PASSWORD:
-        raise HTTPException(
-            status_code=500,
-            detail="Email service is not configured."
-        )
+    if not BREVO_API_KEY or not SMTP_EMAIL:
+        raise HTTPException(status_code=500, detail="Email service is not configured.")
 
-    message = EmailMessage()
-    message["Subject"] = "Rail Split - Password Reset"
-    message["From"] = SMTP_EMAIL
-    message["To"] = to_email
+    payload = {
+        "sender": {"name": "Rail Split", "email": SMTP_EMAIL},
+        "to": [{"email": to_email}],
+        "subject": "Rail Split - Password Reset",
+        "textContent": (
+            "Hello,\n\n"
+            "We received a request to reset your Rail Split password.\n\n"
+            "Click the link below to set a new password:\n\n"
+            f"{reset_link}\n\n"
+            "This link expires in 15 minutes.\n\n"
+            "If you did not request this, please ignore this email.\n\n"
+            "Rail Split Team"
+        ),
+    }
 
-    message.set_content(
-        f"""Hello,
-
-We received a request to reset your Rail Split password.
-
-Click the link below to set a new password:
-
-{reset_link}
-
-This link expires in 15 minutes.
-
-If you did not request this, please ignore this email.
-
-Rail Split Team
-"""
+    req = urllib.request.Request(
+        "https://api.brevo.com/v3/smtp/email",
+        data=json.dumps(payload).encode("utf-8"),
+        headers={
+            "api-key": BREVO_API_KEY,
+            "content-type": "application/json",
+            "accept": "application/json",
+        },
+        method="POST",
     )
 
     try:
-        with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
-            server.starttls()
-            server.login(SMTP_EMAIL, SMTP_PASSWORD)
-            server.send_message(message)
-
+        urllib.request.urlopen(req, timeout=15)
     except Exception:
         raise HTTPException(
             status_code=500,
-            detail="Unable to send reset email. Check email configuration."
+            detail="Unable to send reset email. Check email configuration.",
         )
+
 
 # ---------------------------------------------------------------- db helpers
 def get_class(conn, class_name: str):
@@ -796,5 +797,7 @@ def timetable_station(q: str = Query(min_length=2, max_length=60), include_passi
                "is_halt": bool(r["is_halt"]), "bookable": r["train_number"] in bookable} for r in rows[:limit]]
     return {"station_code": st["station_code"], "station_name": st["station_name"], "total": len(rows),
             "shown": len(trains), "trains": trains}
-    # ---- website serve karo (ye hamesha sabse LAST mein rahe) ----
+
+
+# ---- serve the website (must stay LAST so API routes win) ----
 app.mount("/", StaticFiles(directory=str(Path(__file__).resolve().parent / "static"), html=True), name="site")
