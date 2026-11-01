@@ -1,0 +1,354 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rail Split | Smart Journey Planner</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+  <div class="brand">
+    <div class="brand-icon">↗</div>
+    <div class="brand-text">
+      <strong>RAIL SPLIT</strong>
+      <small>SMART JOURNEYS</small>
+    </div>
+  </div>
+
+  <div class="nav-label">WORKSPACE</div>
+  <nav class="nav">
+    <button class="active" data-page="home"><span class="ico">⌂</span><span class="nav-text">Dashboard</span></button>
+    <button data-page="search"><span class="ico">⌕</span><span class="nav-text">Find a Journey</span></button>
+    <button data-page="status"><span class="ico">◔</span><span class="nav-text">Train Status</span></button>
+    <button data-page="bookings"><span class="ico">▤</span><span class="nav-text">My Bookings</span></button>
+    <button data-page="login"><span class="ico">⇥</span><span class="nav-text">Login</span></button>
+    <button data-page="register"><span class="ico">＋</span><span class="nav-text">Create Account</span></button>
+  </nav>
+
+  <div class="sidebar-bottom">
+    <span class="status-dot"></span>Journey engine ready
+    <br><br>Smart routes. Better choices.
+  </div>
+</aside>
+
+<main class="main">
+<header class="topbar">
+  <div class="crumb">Rail Split <span style="color:#a5b5c3"> / </span> <b id="crumb">Dashboard</b></div>
+  <div class="profile">
+    <div class="avatar" id="avatar">G</div>
+    <div>
+      <div class="profile-name" id="profileName">Guest traveller</div>
+      <div class="profile-sub" id="profileSub">Plan your next journey</div>
+    </div>
+    <button id="logoutBtn" class="btn btn-light hidden" style="padding:8px 11px;font-size:11px">Log out</button>
+  </div>
+</header>
+
+<div class="content">
+
+<!-- DASHBOARD -->
+<section id="page-home" class="page">
+  <div class="welcome">
+    <div>
+      <div class="eyebrow">YOUR JOURNEY, REIMAGINED</div>
+      <h1>Every route has a smarter way.</h1>
+      <p>Find a direct train or discover smart split-ticket options when a direct journey isn't available.</p>
+    </div>
+    <div class="date-chip" id="todayChip">✦ Smart journey planner</div>
+  </div>
+
+  <div class="hero">
+    <div class="eyebrow" style="color:#a9e4ff">INTRODUCING RAIL SPLIT</div>
+    <h2>Don't stop at “no tickets available”.</h2>
+    <p>Our journey engine checks direct routes first, then explores same-train splits and alternative train connections.</p>
+    <div class="hero-tags">
+      <span>✓ Direct route first</span>
+      <span>↗ Same train split</span>
+      <span>⇄ Smart train switching</span>
+    </div>
+    <button class="btn" style="margin-top:22px;background:white;color:#155b98" onclick="showPage('search')">Plan a journey →</button>
+    <button class="btn" style="margin:22px 0 0 10px;background:#ffffff22;color:#fff;border:1px solid #ffffff55" onclick="showPage('status')">Train status</button>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-icon">🚆</div><div><small>Search strategy</small><b>Direct first</b></div></div>
+    <div class="stat"><div class="stat-icon">🔁</div><div><small>Alternative routes</small><b>Smart split options</b></div></div>
+    <div class="stat"><div class="stat-icon">🎫</div><div><small>Booking flow</small><b>PNR confirmation</b></div></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <div><h2>Where would you like to go?</h2><p>Enter your journey details to explore available routes.</p></div>
+      <span class="pill">PLAN A TRIP</span>
+    </div>
+    <form id="homeSearch" class="search-grid">
+      <div class="field"><label for="homeSource">From station / city</label><input id="homeSource" list="stationsList" placeholder="e.g. Mumbai Central" required></div>
+      <div class="field"><label for="homeDestination">To station / city</label><input id="homeDestination" list="stationsList" placeholder="e.g. New Delhi" required></div>
+      <div class="field"><label for="homeDate">Travel date</label><input id="homeDate" type="date" required></div>
+      <div class="field"><label for="homeClass">Travel class</label><select id="homeClass"><option value="Sleeper">Sleeper (SL)</option><option value="3AC">AC 3 Tier (3AC)</option><option value="2AC">AC 2 Tier (2AC)</option><option value="1AC">First AC (1AC)</option></select></div>
+      <div class="field"><label for="homePassengers">Travellers</label><select id="homePassengers"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select></div>
+      <button class="btn btn-primary search-button" type="submit">⌕ Search trains</button>
+    </form>
+    <div class="hint">Availability shown is based on the project's configured database data and is for demonstration purposes.</div>
+  </div>
+</section>
+
+<!-- SEARCH -->
+<section id="page-search" class="page hidden">
+  <div class="welcome">
+    <div><div class="eyebrow">ROUTE DISCOVERY</div><h1>Find your best journey.</h1><p>Search direct options first, followed by split routes if needed.</p></div>
+  </div>
+  <div id="searchNotice"></div>
+  <div class="panel">
+    <div class="panel-head">
+      <div><h2>Journey details</h2><p>Choose your stations, date and preferred class.</p></div>
+      <span class="pill">STEP 01 · SEARCH</span>
+    </div>
+    <form id="journeySearch" class="search-grid">
+      <div class="field"><label for="source">From station / city</label><input id="source" list="stationsList" placeholder="Station or city" required></div>
+      <div class="field"><label for="destination">To station / city</label><input id="destination" list="stationsList" placeholder="Station or city" required></div>
+      <div class="field"><label for="travelDate">Travel date</label><input id="travelDate" type="date" required></div>
+      <div class="field"><label for="className">Travel class</label><select id="className"><option value="Sleeper">Sleeper (SL)</option><option value="3AC">AC 3 Tier (3AC)</option><option value="2AC">AC 2 Tier (2AC)</option><option value="1AC">First AC (1AC)</option></select></div>
+      <div class="field"><label for="passengers">Travellers</label><select id="passengers"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select></div>
+      <button class="btn btn-primary search-button" type="submit" id="searchBtn">⌕ Search trains</button>
+    </form>
+    <div class="hint">Choose stations from the demo network. Dates in the past cannot be searched.</div>
+  </div>
+  <div id="results"></div>
+</section>
+
+<!-- BOOKINGS -->
+<section id="page-status" class="page hidden">
+  <div class="welcome">
+    <div><div class="eyebrow">TRAIN STATUS</div><h1>Check any train's schedule.</h1><p>Search a train by number or name, or see every train that stops at a station.</p></div>
+  </div>
+  <div id="statusNotice"></div>
+  <div class="panel">
+    <div class="status-tabs" id="statusTabs">
+      <button type="button" class="status-tab active" data-mode="train">Train</button>
+      <button type="button" class="status-tab" data-mode="station">Station</button>
+    </div>
+    <form id="statusForm" class="status-form">
+      <div class="field"><label for="statusQuery" id="statusLabel">Train number or name</label><input id="statusQuery" minlength="2" autocomplete="off" placeholder="e.g. 12951 or Rajdhani" required></div>
+      <button class="btn btn-primary" type="submit" id="statusBtn">Search</button>
+    </form>
+  </div>
+  <div id="statusResults"></div>
+</section>
+
+<section id="page-bookings" class="page hidden">
+  <div class="welcome">
+    <div><div class="eyebrow">YOUR TRAVEL RECORD</div><h1>My bookings.</h1><p>View your confirmed tickets and PNR details in one place.</p></div>
+    <button class="btn btn-primary" onclick="showPage('search')">＋ New journey</button>
+  </div>
+  <div id="bookingNotice"></div>
+  <div class="panel">
+    <div class="panel-head">
+      <div><h2>Booking history</h2><p>Your latest bookings appear here.</p></div>
+      <button class="btn btn-light" onclick="loadBookings()">↻ Refresh</button>
+    </div>
+    <div id="bookingList"><div class="empty"><div class="empty-icon">🎫</div><b>Your journeys will appear here</b>Log in to view your bookings.</div></div>
+  </div>
+</section>
+
+<!-- LOGIN -->
+<section id="page-login" class="page hidden">
+  <div class="auth-wrap">
+    <div class="auth-brand">
+      <div class="brand-icon">↗</div>
+      <div class="eyebrow" style="margin-top:14px">WELCOME BACK</div>
+      <h1 style="margin:5px 0">Log in to Rail Split</h1>
+      <p style="color:var(--muted);margin:0">Continue planning your smarter journey.</p>
+    </div>
+
+    <div id="loginNotice"></div>
+
+    <div class="panel">
+      <form id="loginForm" class="auth-form">
+        <div class="field">
+          <label for="loginEmail">Email address</label>
+          <input id="loginEmail" type="email" placeholder="you@example.com" required>
+        </div>
+        <div class="field">
+          <label for="loginPassword">Password</label>
+          <input id="loginPassword" type="password" placeholder="Enter your password" required>
+        </div>
+
+        <!-- FORGOT PASSWORD LINK -->
+        <div style="text-align:right;margin-top:-5px">
+          <button type="button" class="text-btn" onclick="showPage('forgot')">Forgot Password?</button>
+        </div>
+
+        <button class="btn btn-primary" type="submit">Log in →</button>
+      </form>
+      <p class="auth-switch">New to Rail Split? <button class="text-btn" type="button" onclick="showPage('register')">Create account</button></p>
+    </div>
+  </div>
+</section>
+
+<!-- FORGOT PASSWORD -->
+<section id="page-forgot" class="page hidden">
+  <div class="auth-wrap">
+    <div class="auth-brand">
+      <div class="brand-icon">↗</div>
+      <div class="eyebrow" style="margin-top:14px">ACCOUNT RECOVERY</div>
+      <h1 style="margin:5px 0">Forgot Password?</h1>
+      <p style="color:var(--muted);margin:0">Enter your registered email to receive a secure reset link.</p>
+    </div>
+
+    <div id="forgotNotice"></div>
+
+    <div class="panel">
+      <form id="forgotForm" class="auth-form">
+        <div class="field">
+          <label for="forgotEmail">Registered email address</label>
+          <input id="forgotEmail" type="email" placeholder="you@example.com" required>
+        </div>
+        <button class="btn btn-primary" type="submit">Send Reset Link →</button>
+      </form>
+
+      <p class="auth-switch">
+        Remember your password?
+        <button class="text-btn" type="button" onclick="showPage('login')">Back to Login</button>
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- RESET PASSWORD -->
+<section id="page-reset" class="page hidden">
+  <div class="auth-wrap">
+    <div class="auth-brand">
+      <div class="brand-icon">↗</div>
+      <div class="eyebrow" style="margin-top:14px">SECURE ACCOUNT RECOVERY</div>
+      <h1 style="margin:5px 0">Set New Password</h1>
+      <p style="color:var(--muted);margin:0">Choose a strong password for your account.</p>
+    </div>
+
+    <div id="resetNotice"></div>
+
+    <div class="panel">
+      <form id="resetForm" class="auth-form">
+        <div class="field">
+          <label for="newPassword">New password</label>
+          <input id="newPassword" type="password" minlength="8" placeholder="Enter new password" required>
+        </div>
+        <div class="field">
+          <label for="confirmPassword">Confirm new password</label>
+          <input id="confirmPassword" type="password" minlength="8" placeholder="Re-enter new password" required>
+        </div>
+        <button class="btn btn-primary" type="submit">Update Password →</button>
+      </form>
+      <p class="auth-switch">
+        <button class="text-btn" type="button" onclick="showPage('login')">Back to Login</button>
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- REGISTER -->
+<section id="page-register" class="page hidden">
+  <div class="auth-wrap">
+    <div class="auth-brand">
+      <div class="brand-icon">↗</div>
+      <div class="eyebrow" style="margin-top:14px">GET STARTED</div>
+      <h1 style="margin:5px 0">Create your account</h1>
+      <p style="color:var(--muted);margin:0">Your next journey starts here.</p>
+    </div>
+
+    <div id="registerNotice"></div>
+
+    <div class="panel">
+      <form id="registerForm" class="auth-form">
+        <div class="field"><label for="regName">Full name</label><input id="regName" placeholder="Your full name" required></div>
+        <div class="field"><label for="regEmail">Email address</label><input id="regEmail" type="email" placeholder="you@example.com" required></div>
+        <div class="field"><label for="regPhone">Phone number <span style="font-weight:400;color:#8b9baa">(optional)</span></label><input id="regPhone" type="tel" placeholder="Your phone number"></div>
+        <div class="field"><label for="regPassword">Password</label><input id="regPassword" type="password" minlength="8" placeholder="At least 8 characters" required></div>
+        <button class="btn btn-primary" type="submit">Create account →</button>
+      </form>
+      <p class="auth-switch">Already registered? <button class="text-btn" type="button" onclick="showPage('login')">Log in</button></p>
+    </div>
+  </div>
+</section>
+
+<!-- PASSENGER DETAILS -->
+<section id="page-passengers" class="page hidden">
+  <div class="welcome">
+    <div><div class="eyebrow">STEP 02 · PASSENGERS</div><h1>Passenger details.</h1><p>Enter details exactly as they appear on the traveller's ID proof.</p></div>
+  </div>
+  <div id="passengerNotice"></div>
+  <div class="panel" id="journeySummary"></div>
+  <form id="passengerForm">
+    <div id="passengerCards"></div>
+    <div class="panel total-bar">
+      <div><small>Total fare (incl. taxes &amp; fees)</small><b id="passengerTotal">₹0</b></div>
+      <div class="btn-row">
+        <button type="button" class="btn btn-light" onclick="showPage('search')">← Back to results</button>
+        <button type="submit" class="btn btn-primary">Continue to payment →</button>
+      </div>
+    </div>
+  </form>
+</section>
+
+<!-- PAYMENT -->
+<section id="page-payment" class="page hidden">
+  <div class="welcome">
+    <div><div class="eyebrow">STEP 03 · PAYMENT</div><h1>Review &amp; pay.</h1><p>This is a demo payment page. No real money is charged and no real bank is contacted.</p></div>
+  </div>
+  <div id="paymentNotice"></div>
+  <div class="pay-grid">
+    <div class="panel">
+      <div class="panel-head"><div><h2>Fare breakdown</h2><p id="fareSub"></p></div><span class="pill">DEMO</span></div>
+      <div id="fareBreakdown"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><div><h2>Payment method</h2><p>Choose any option. Try test values, e.g. UPI: test@upi</p></div></div>
+      <div class="pay-tabs">
+        <button type="button" class="pay-tab active" data-method="UPI">UPI</button>
+        <button type="button" class="pay-tab" data-method="Card">Card</button>
+        <button type="button" class="pay-tab" data-method="NetBanking">Net Banking</button>
+      </div>
+      <form id="paymentForm" class="auth-form">
+        <div class="pay-pane" id="pane-UPI">
+          <div class="field"><label for="upiId">UPI ID</label><input id="upiId" placeholder="name@upi"></div>
+        </div>
+        <div class="pay-pane hidden" id="pane-Card">
+          <div class="field"><label for="cardNumber">Card number</label><input id="cardNumber" inputmode="numeric" maxlength="19" placeholder="1234 5678 9012 3456"></div>
+          <div class="two-col">
+            <div class="field"><label for="cardExpiry">Expiry (MM/YY)</label><input id="cardExpiry" maxlength="5" placeholder="08/29"></div>
+            <div class="field"><label for="cardCvv">CVV</label><input id="cardCvv" type="password" inputmode="numeric" maxlength="3" placeholder="•••"></div>
+          </div>
+        </div>
+        <div class="pay-pane hidden" id="pane-NetBanking">
+          <div class="field"><label for="bankName">Select bank</label>
+            <select id="bankName"><option value="">Choose your bank</option><option>State Bank of India</option><option>HDFC Bank</option><option>ICICI Bank</option><option>Axis Bank</option><option>Punjab National Bank</option><option>Bank of Baroda</option></select></div>
+        </div>
+        <button class="btn btn-primary" type="submit" id="payBtn">Pay ₹0</button>
+        <button class="btn btn-light" type="button" onclick="showPage('passengers')">← Edit passengers</button>
+        <div class="hint">🔒 Demo only: nothing is charged and card details are never stored.</div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- BOOKING CONFIRMATION -->
+<section id="page-confirmation" class="page hidden">
+  <div class="welcome">
+    <div><div class="eyebrow">BOOKING COMPLETE</div><h1>Your ticket details.</h1><p>Your PNR and ticket details will stay visible on this page.</p></div>
+  </div>
+  <div id="confirmationContent"></div>
+</section>
+
+<datalist id="stationsList"></datalist>
+<div class="footer">Built for the Rail Split project · Demo availability is simulated, not live railway inventory.</div>
+</div>
+</main>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+<script src="script.js"></script>
+</body>
+</html>
